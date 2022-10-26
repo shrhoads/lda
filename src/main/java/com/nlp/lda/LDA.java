@@ -189,7 +189,7 @@ public class LDA {
 	private double sumColumn(SparseMatrix m, int column) {
 	  double sum = 0;
 	  for(int i=0; i<m.columnSize(); i++) {
-	    sum += m.get(column, i);
+	    sum += m.get(i, column);
 	  }
 	  return sum;
 	}
@@ -246,9 +246,9 @@ public class LDA {
 			//System.out.println("max=" + max + ", maxInx=" + maxInx);
 			for(int wordInx = 0; wordInx < this.wordTopicMatrix.columnSize(); wordInx++){
 				//System.out.println("wordInx=" + wordInx + ", count=" + vec.get(wordInx));
-				if(this.wordTopicMatrix.get(topicIndex, wordInx) > max && !indexMap.containsKey(wordInx)){
+				if(this.wordTopicMatrix.get(wordInx, topicIndex) > max && !indexMap.containsKey(wordInx)){
 					maxInx = wordInx;
-					max = this.wordTopicMatrix.get(topicIndex, wordInx);
+					max = this.wordTopicMatrix.get(wordInx, topicIndex);
 				}
 			}
 			//System.out.println("top word#" + index);
@@ -266,7 +266,7 @@ public class LDA {
 		*/
 		System.out.println("Top words for topic=" + topicIndex);
 		for(int index = 0; index < top; index++){
-			if(this.wordTopicMatrix.get(topicIndex, indexes[index]) > 0){
+			if(this.wordTopicMatrix.get(indexes[index], topicIndex) > 0){
 				System.out.println(this.wordIndexInverseMap.get(indexes[index]) + ":" + getTopicWordProbability(this.wordIndexInverseMap.get(indexes[index]), topicIndex));
 			}
 		}

@@ -62,10 +62,10 @@ public class LDA {
 			this.documentMatrix.add(document);
 			this.currentState.add(state);
 		}
-		int documentMatrixCardinality[] = {topicsNum, this.documentMatrix.size()};
-		this.docTopicMatrix = new SparseMatrix(documentMatrixCardinality);
-		int wordTopicMatrixCardinality[] = {this.vocabSize, topicsNum};
-		this.wordTopicMatrix = new SparseMatrix(wordTopicMatrixCardinality);
+		//int documentMatrixCardinality[] = {topicsNum, this.documentMatrix.size()};
+		this.docTopicMatrix = new SparseMatrix(topicsNum, this.documentMatrix.size());
+		//int wordTopicMatrixCardinality[] = {this.vocabSize, topicsNum};
+		this.wordTopicMatrix = new SparseMatrix(this.vocabSize, topicsNum);
 		//init NK
 		for(int index = 0; index < topicsNum; index++){
 			this.NK.put(index, 0.0);
@@ -186,6 +186,14 @@ public class LDA {
 		this.currentState.set(docIndex, state);
 	}
 	
+	private double sumColumn(SparseMatrix m, int column) {
+	  double sum = 0;
+	  for(int i=0; i<m.columnSize(); i++) {
+	    sum += m.get(i, column);
+	  }
+	  return sum;
+	}
+	
 	/**
 	 * TODO get TopicWord probability.
 	 *
@@ -196,8 +204,9 @@ public class LDA {
 	public double getTopicWordProbability(String word, int topicIndex){
 		int wordIndex = this.wordIndexMap.get(word);
 		double Nwk = this.wordTopicMatrix.get(wordIndex, topicIndex);
-		Vector vec = this.wordTopicMatrix.getColumn(topicIndex);
-		double Nk = vec.zSum();
+		//Vector vec = this.wordTopicMatrix.get
+		//double Nk = vec.zSum();
+		double Nk = sumColumn(this.wordTopicMatrix, topicIndex);
 		
 		return (Nwk + this.beta)/(Nk + this.vocabSize*this.beta);
 	}
@@ -211,8 +220,9 @@ public class LDA {
 	 */
 	public double getTopicDocProbability(int docIndex, int topicIndex){
 		double Nkj = this.docTopicMatrix.get(topicIndex, docIndex);
-		Vector vec = this.docTopicMatrix.getColumn(docIndex);
-		double Nj = vec.zSum();
+		//Vector vec = this.docTopicMatrix.getColumn(docIndex);
+		//double Nj = vec.zSum();
+		double Nj = sumColumn(this.docTopicMatrix, docIndex);
 		
 		System.out.println("Nkj=" + Nkj);
 		System.out.println("Nj=" + Nj);
@@ -227,18 +237,18 @@ public class LDA {
 	 * @param top
 	 */
 	public void printTopicTopWords(int topicIndex, int top){
-		Vector vec = this.wordTopicMatrix.getColumn(topicIndex);
+		//Vector vec = this.wordTopicMatrix.getColumn(topicIndex);
 		int indexes[] = new int[top];
 		Hashtable<Integer, Integer> indexMap = new Hashtable<Integer, Integer>();
 		for(int index = 0; index < top; index++){
 			int maxInx = -1;
 			double max = 0.0;
 			//System.out.println("max=" + max + ", maxInx=" + maxInx);
-			for(int wordInx = 0; wordInx < vec.size(); wordInx++){
+			for(int wordInx = 0; wordInx < this.wordTopicMatrix.columnSize(); wordInx++){
 				//System.out.println("wordInx=" + wordInx + ", count=" + vec.get(wordInx));
-				if(vec.get(wordInx) > max && !indexMap.containsKey(wordInx)){
+				if(this.wordTopicMatrix.get(wordInx, topicIndex) > max && !indexMap.containsKey(wordInx)){
 					maxInx = wordInx;
-					max = vec.get(wordInx);
+					max = this.wordTopicMatrix.get(wordInx, topicIndex);
 				}
 			}
 			//System.out.println("top word#" + index);
@@ -256,7 +266,7 @@ public class LDA {
 		*/
 		System.out.println("Top words for topic=" + topicIndex);
 		for(int index = 0; index < top; index++){
-			if(vec.get(indexes[index]) > 0){
+			if(this.wordTopicMatrix.get(indexes[index], topicIndex) > 0){
 				System.out.println(this.wordIndexInverseMap.get(indexes[index]) + ":" + getTopicWordProbability(this.wordIndexInverseMap.get(indexes[index]), topicIndex));
 			}
 		}
